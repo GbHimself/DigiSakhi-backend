@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DigiSakhi Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Poppins',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+    a{text-decoration:none;color:inherit}
+
+    /* Login screen */
+    #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e1b4b)}
+    .login-card{background:#1e293b;border-radius:16px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    .login-card h1{font-size:1.5rem;font-weight:700;color:#a78bfa;margin-bottom:.25rem;display:flex;align-items:center;gap:.5rem}
+    .login-card p{font-size:.85rem;color:#94a3b8;margin-bottom:2rem}
+    .login-input{width:100%;padding:.75rem 1rem;background:#0f172a;border:2px solid #334155;border-radius:8px;color:#e2e8f0;font-family:'Poppins',sans-serif;font-size:.9rem;margin-bottom:1rem;outline:none;transition:border-color .2s}
+    .login-input:focus{border-color:#7c3aed}
+    .login-btn{width:100%;padding:.85rem;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s}
+    .login-btn:hover{background:#6d28d9}
+    .login-error{color:#f87171;font-size:.82rem;margin-top:.5rem;display:none}
+
+    /* Main layout */
+    #mainApp{display:none;min-height:100vh}
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:#1e293b;padding:1.5rem 0;display:flex;flex-direction:column;z-index:100}
+    .sidebar-logo{padding:0 1.5rem 1.5rem;border-bottom:1px solid #334155;font-size:1.1rem;font-weight:700;color:#a78bfa;display:flex;align-items:center;gap:.5rem}
+    .sidebar-menu{flex:1;padding-top:1rem}
+    .sidebar-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.5rem;cursor:pointer;color:#94a3b8;font-size:.88rem;font-weight:500;transition:all .2s;position:relative}
+    .sidebar-item:hover,.sidebar-item.active{background:#0f172a;color:#a78bfa}
+    .sidebar-item i{width:18px;text-align:center}
+    .sidebar-badge{margin-left:auto;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;padding:.1rem .45rem;border-radius:50px;min-width:20px;text-align:center}
+    .sidebar-footer{padding:1rem 1.5rem;border-top:1px solid #334155}
+    .logout-btn{display:flex;align-items:center;gap:.5rem;color:#f87171;font-size:.85rem;cursor:pointer;background:none;border:none;font-family:'Poppins',sans-serif;padding:0}
+
+    .main{margin-left:240px;padding:2rem;min-height:100vh}
+    .page-header{margin-bottom:2rem}
+    .page-header h2{font-size:1.4rem;font-weight:700;color:#f1f5f9}
+    .page-header p{font-size:.85rem;color:#94a3b8;margin-top:.25rem}
+
+    /* Stat cards */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:#1e293b;border-radius:12px;padding:1.25rem 1.5rem;border-left:4px solid}
+    .stat-card.purple{border-color:#7c3aed}.stat-card.red{border-color:#dc2626}.stat-card.green{border-color:#059669}.stat-card.orange{border-color:#ea580c}
+    .stat-num{font-size:2rem;font-weight:800;line-height:1}
+    .stat-label{font-size:.78rem;color:#94a3b8;margin-top:.25rem}
+    .stat-pending{font-size:.72rem;color:#f87171;font-weight:600;margin-top:.2rem}
+
+    /* Table */
+    .table-wrap{background:#1e293b;border-radius:12px;overflow:hidden}
+    .table-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid #334155}
+    .table-head h3{font-size:.95rem;font-weight:600;color:#f1f5f9}
+    .filter-btns{display:flex;gap:.4rem}
+    .filter-btn{padding:.3rem .75rem;border:1px solid #334155;border-radius:50px;font-size:.75rem;font-weight:600;cursor:pointer;background:none;color:#94a3b8;font-family:'Poppins',sans-serif;transition:all .2s}
+    .filter-btn.active,.filter-btn:hover{background:#7c3aed;color:#fff;border-color:#7c3aed}
+    table{width:100%;border-collapse:collapse}
+    th{padding:.75rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;background:#1e293b;border-bottom:1px solid #334155}
+    td{padding:.85rem 1rem;font-size:.82rem;color:#cbd5e1;border-bottom:1px solid #1e293b;vertical-align:top}
+    tr:hover td{background:#0f172a22}
+    .status-badge{padding:.2rem .65rem;border-radius:50px;font-size:.7rem;font-weight:700}
+    .status-badge.pending{background:#78350f;color:#fde68a}
+    .status-badge.approved{background:#064e3b;color:#6ee7b7}
+    .status-badge.rejected{background:#4b1111;color:#fca5a5}
+    .action-btns{display:flex;gap:.4rem;flex-wrap:wrap}
+    .btn-approve{background:#059669;color:#fff;border:none;padding:.3rem .7rem;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:'Poppins',sans-serif;font-weight:600}
+    .btn-reject{background:#dc2626;color:#fff;border:none;padding:.3rem .7rem;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:'Poppins',sans-serif;font-weight:600}
+    .btn-delete{background:#374151;color:#f87171;border:none;padding:.3rem .7rem;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:'Poppins',sans-serif}
+    .loading{text-align:center;padding:3rem;color:#64748b}
+    .empty{text-align:center;padding:3rem;color:#64748b;font-size:.9rem}
+
+    /* Alerts management */
+    .alert-form{background:#1e293b;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+    .alert-form h3{font-size:.95rem;font-weight:600;margin-bottom:1rem;color:#f1f5f9}
+    .alert-inputs{display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end}
+    .alert-input{flex:1;min-width:200px;padding:.65rem 1rem;background:#0f172a;border:2px solid #334155;border-radius:8px;color:#e2e8f0;font-family:'Poppins',sans-serif;font-size:.85rem;outline:none}
+    .alert-input:focus{border-color:#7c3aed}
+    .alert-select{padding:.65rem 1rem;background:#0f172a;border:2px solid #334155;border-radius:8px;color:#e2e8f0;font-family:'Poppins',sans-serif;font-size:.85rem;cursor:pointer;outline:none}
+    .btn-add{background:#7c3aed;color:#fff;border:none;padding:.65rem 1.5rem;border-radius:8px;font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1e293b;border-radius:10px;padding:.85rem 1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.4);border-left:4px solid #059669;color:#e2e8f0;font-size:.85rem;z-index:9999;transition:all .3s;opacity:0;transform:translateY(10px);pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast.error{border-color:#dc2626}
+    .text-truncate{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    /* Section pages */
+    .section-page{display:none}
+    .section-page.active{display:block}
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1><i class="fas fa-shield-alt"></i> DigiSakhi Admin</h1>
+    <p>Sign in to manage the website content</p>
+    <input type="text" class="login-input" id="loginUser" placeholder="Username" autocomplete="username"/>
+    <input type="password" class="login-input" id="loginPass" placeholder="Password" autocomplete="current-password"/>
+    <button class="login-btn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="mainApp">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><i class="fas fa-mobile-screen-button"></i> DigiSakhi</div>
+    <div class="sidebar-menu">
+      <div class="sidebar-item active" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+      <div class="sidebar-item" onclick="showPage('reports')"><i class="fas fa-flag"></i> Scam Reports <span class="sidebar-badge" id="badge-reports">0</span></div>
+      <div class="sidebar-item" onclick="showPage('stories')"><i class="fas fa-book-open"></i> Stories <span class="sidebar-badge" id="badge-stories">0</span></div>
+      <div class="sidebar-item" onclick="showPage('reviews')"><i class="fas fa-star"></i> Reviews <span class="sidebar-badge" id="badge-reviews">0</span></div>
+      <div class="sidebar-item" onclick="showPage('alerts')"><i class="fas fa-bell"></i> Live Alerts</div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="section-page active" id="page-dashboard">
+      <div class="page-header">
+        <h2>Dashboard</h2>
+        <p>Overview of all submissions and content</p>
+      </div>
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card purple"><div class="stat-num" id="stat-reports">—</div><div class="stat-label">Scam Reports</div><div class="stat-pending" id="stat-reports-p"></div></div>
+        <div class="stat-card red"><div class="stat-num" id="stat-stories">—</div><div class="stat-label">Stories</div><div class="stat-pending" id="stat-stories-p"></div></div>
+        <div class="stat-card green"><div class="stat-num" id="stat-reviews">—</div><div class="stat-label">Reviews</div><div class="stat-pending" id="stat-reviews-p"></div></div>
+        <div class="stat-card orange"><div class="stat-num" id="stat-alerts">—</div><div class="stat-label">Active Alerts</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head"><h3>Recent Scam Reports</h3></div>
+        <div id="recentReports"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="section-page" id="page-reports">
+      <div class="page-header"><h2>Scam Reports</h2><p>Review and manage community scam reports</p></div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>All Reports</h3>
+          <div class="filter-btns">
+            <button class="filter-btn active" onclick="filterTable('reports','all',this)">All</button>
+            <button class="filter-btn" onclick="filterTable('reports','pending',this)">Pending</button>
+            <button class="filter-btn" onclick="filterTable('reports','approved',this)">Approved</button>
+          </div>
+        </div>
+        <div id="reportsTable"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- STORIES -->
+    <div class="section-page" id="page-stories">
+      <div class="page-header"><h2>Case Stories</h2><p>Approve stories to show them on the Real Incidents page</p></div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>All Stories</h3>
+          <div class="filter-btns">
+            <button class="filter-btn active" onclick="filterTable('stories','all',this)">All</button>
+            <button class="filter-btn" onclick="filterTable('stories','pending',this)">Pending</button>
+            <button class="filter-btn" onclick="filterTable('stories','approved',this)">Approved</button>
+          </div>
+        </div>
+        <div id="storiesTable"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="section-page" id="page-reviews">
+      <div class="page-header"><h2>Reviews & Comments</h2><p>Approve reviews to show them on the Real Incidents page</p></div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <h3>All Reviews</h3>
+          <div class="filter-btns">
+            <button class="filter-btn active" onclick="filterTable('reviews','all',this)">All</button>
+            <button class="filter-btn" onclick="filterTable('reviews','pending',this)">Pending</button>
+            <button class="filter-btn" onclick="filterTable('reviews','approved',this)">Approved</button>
+          </div>
+        </div>
+        <div id="reviewsTable"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="section-page" id="page-alerts">
+      <div class="page-header"><h2>Live Scam Alerts</h2><p>Manage the live ticker on the Online Safety page</p></div>
+      <div class="alert-form">
+        <h3>Add New Alert</h3>
+        <div class="alert-inputs">
+          <input type="text" class="alert-input" id="newAlertText" placeholder="Alert text — e.g. Fake KYC call scam in Bihar — Jan 2026"/>
+          <select class="alert-select" id="newAlertType">
+            <option value="danger">🔴 Danger</option>
+            <option value="warning">🟡 Warning</option>
+            <option value="info">🔵 Info</option>
+          </select>
+          <button class="btn-add" onclick="addAlert()"><i class="fas fa-plus"></i> Add Alert</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head"><h3>All Alerts</h3></div>
+        <div id="alertsTable"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Config ── */
+const API = 'http://localhost:3000/api/admin';
+let TOKEN = localStorage.getItem('ds_admin_token') || '';
+let currentData = {};
+
+/* ── On load — check if already logged in ── */
+window.onload = () => {
+  if (TOKEN) { showApp(); loadDashboard(); }
+};
+
+/* ── LOGIN ── */
+async function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err  = document.getElementById('loginError');
+  err.style.display = 'none';
+  try {
+    const res  = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error; err.style.display = 'block'; return; }
+    TOKEN = data.token;
+    localStorage.setItem('ds_admin_token', TOKEN);
+    showApp();
+    loadDashboard();
+  } catch {
+    err.textContent = 'Cannot connect to server. Is the backend running?';
+    err.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  TOKEN = '';
+  localStorage.removeItem('ds_admin_token');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+}
+
+/* ── NAVIGATION ── */
+function showPage(page) {
+  document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (page === 'dashboard') loadDashboard();
+  else loadTable(page);
+}
+
+/* ── API helper ── */
+async function api(path, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  return res.json();
+}
+
+/* ── DASHBOARD ── */
+async function loadDashboard() {
+  try {
+    const d = await api('/dashboard');
+    document.getElementById('stat-reports').textContent = d.totals.reports;
+    document.getElementById('stat-stories').textContent = d.totals.stories;
+    document.getElementById('stat-reviews').textContent = d.totals.reviews;
+    document.getElementById('stat-alerts').textContent  = d.totals.activeAlerts;
+    if (d.pending.reports) document.getElementById('stat-reports-p').textContent = d.pending.reports + ' pending';
+    if (d.pending.stories) document.getElementById('stat-stories-p').textContent = d.pending.stories + ' pending';
+    if (d.pending.reviews) document.getElementById('stat-reviews-p').textContent = d.pending.reviews + ' pending';
+    document.getElementById('badge-reports').textContent = d.pending.reports || '';
+    document.getElementById('badge-stories').textContent = d.pending.stories || '';
+    document.getElementById('badge-reviews').textContent = d.pending.reviews || '';
+    /* recent reports */
+    const items = await api('/reports');
+    document.getElementById('recentReports').innerHTML = renderTable('reports', items.slice(0,5));
+  } catch (e) {
+    document.getElementById('recentReports').innerHTML = '<div class="empty">Could not connect to server</div>';
+  }
+}
+
+/* ── LOAD TABLE ── */
+async function loadTable(model) {
+  const el = document.getElementById(model + 'Table');
+  el.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+  try {
+    const items = await api('/' + model);
+    currentData[model] = items;
+    el.innerHTML = renderTable(model, items);
+  } catch {
+    el.innerHTML = '<div class="empty">Could not load data</div>';
+  }
+}
+
+function filterTable(model, status, btn) {
+  document.querySelectorAll(`#page-${model} .filter-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const items = currentData[model] || [];
+  const filtered = status === 'all' ? items : items.filter(i => i.status === status);
+  document.getElementById(model + 'Table').innerHTML = renderTable(model, filtered);
+}
+
+/* ── RENDER TABLE ── */
+function renderTable(model, items) {
+  if (!items || items.length === 0) return '<div class="empty">No entries found</div>';
+
+  const headers = {
+    reports: ['Type','Description','Location','Date','Status','Actions'],
+    stories: ['Name','Type','Story','Location','Status','Actions'],
+    reviews: ['Name','Rating','Comment','Section','Status','Actions'],
+    alerts:  ['Text','Type','Active','Created','Actions']
+  };
+
+  const rows = items.map(item => {
+    let cells = '';
+    if (model === 'reports') {
+      cells = `<td>${item.scam_type}</td>
+               <td><div class="text-truncate">${item.description}</div></td>
+               <td>${item.location||'—'}</td>
+               <td>${item.date||'—'}</td>
+               <td><span class="status-badge ${item.status}">${item.status}</span></td>
+               <td><div class="action-btns">
+                 ${item.status!=='approved'?`<button class="btn-approve" onclick="setStatus('reports','${item._id}','approved')">Approve</button>`:''}
+                 ${item.status!=='rejected'?`<button class="btn-reject" onclick="setStatus('reports','${item._id}','rejected')">Reject</button>`:''}
+                 <button class="btn-delete" onclick="deleteItem('reports','${item._id}')"><i class="fas fa-trash"></i></button>
+               </div></td>`;
+    } else if (model === 'stories') {
+      cells = `<td>${item.name||'Anonymous'}</td>
+               <td>${item.scam_type}</td>
+               <td><div class="text-truncate">${item.story}</div></td>
+               <td>${item.location||'—'}</td>
+               <td><span class="status-badge ${item.status}">${item.status}</span></td>
+               <td><div class="action-btns">
+                 ${item.status!=='approved'?`<button class="btn-approve" onclick="setStatus('stories','${item._id}','approved')">Approve</button>`:''}
+                 ${item.status!=='rejected'?`<button class="btn-reject" onclick="setStatus('stories','${item._id}','rejected')">Reject</button>`:''}
+                 <button class="btn-delete" onclick="deleteItem('stories','${item._id}')"><i class="fas fa-trash"></i></button>
+               </div></td>`;
+    } else if (model === 'reviews') {
+      const stars = '★'.repeat(item.rating) + '☆'.repeat(5-item.rating);
+      cells = `<td>${item.name||'Anonymous'}</td>
+               <td style="color:#f59e0b">${stars}</td>
+               <td><div class="text-truncate">${item.comment}</div></td>
+               <td>${item.section||'—'}</td>
+               <td><span class="status-badge ${item.status}">${item.status}</span></td>
+               <td><div class="action-btns">
+                 ${item.status!=='approved'?`<button class="btn-approve" onclick="setStatus('reviews','${item._id}','approved')">Approve</button>`:''}
+                 ${item.status!=='rejected'?`<button class="btn-reject" onclick="setStatus('reviews','${item._id}','rejected')">Reject</button>`:''}
+                 <button class="btn-delete" onclick="deleteItem('reviews','${item._id}')"><i class="fas fa-trash"></i></button>
+               </div></td>`;
+    } else if (model === 'alerts') {
+      cells = `<td><div class="text-truncate">${item.text}</div></td>
+               <td><span style="color:${item.type==='danger'?'#f87171':item.type==='warning'?'#fbbf24':'#60a5fa'}">${item.type}</span></td>
+               <td>${item.active?'<span style="color:#6ee7b7">Active</span>':'<span style="color:#f87171">Hidden</span>'}</td>
+               <td>${new Date(item.createdAt).toLocaleDateString('en-IN')}</td>
+               <td><div class="action-btns">
+                 <button class="btn-${item.active?'reject':'approve'}" onclick="toggleAlert('${item._id}',${!item.active})">${item.active?'Hide':'Show'}</button>
+                 <button class="btn-delete" onclick="deleteItem('alerts','${item._id}')"><i class="fas fa-trash"></i></button>
+               </div></td>`;
+    }
+    return `<tr>${cells}</tr>`;
+  }).join('');
+
+  const ths = headers[model].map(h => `<th>${h}</th>`).join('');
+  return `<table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ── ACTIONS ── */
+async function setStatus(model, id, status) {
+  try {
+    await api(`/${model}/${id}/status`, 'PATCH', { status });
+    showToast(`${status === 'approved' ? '✅ Approved' : '❌ Rejected'} successfully`);
+    loadTable(model);
+    loadDashboard();
+  } catch { showToast('Action failed', true); }
+}
+
+async function deleteItem(model, id) {
+  if (!confirm('Delete this entry permanently?')) return;
+  try {
+    await api(`/${model}/${id}`, 'DELETE');
+    showToast('🗑️ Deleted');
+    loadTable(model);
+    loadDashboard();
+  } catch { showToast('Delete failed', true); }
+}
+
+async function addAlert() {
+  const text = document.getElementById('newAlertText').value.trim();
+  const type = document.getElementById('newAlertType').value;
+  if (!text) { showToast('Please enter alert text', true); return; }
+  try {
+    await api('/alerts', 'POST', { text, type });
+    document.getElementById('newAlertText').value = '';
+    showToast('✅ Alert added');
+    loadTable('alerts');
+    loadDashboard();
+  } catch { showToast('Failed to add alert', true); }
+}
+
+async function toggleAlert(id, active) {
+  try {
+    await api(`/alerts/${id}`, 'PATCH', { active });
+    showToast(active ? '✅ Alert shown' : '🙈 Alert hidden');
+    loadTable('alerts');
+    loadDashboard();
+  } catch { showToast('Failed', true); }
+}
+
+/* ── ENTER key on login ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none') {
+    doLogin();
+  }
+});
+
+/* ── TOAST ── */
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+</script>
+</body>
+</html>
