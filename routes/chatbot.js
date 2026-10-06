@@ -90,7 +90,7 @@ function geminiRequest(apiKey, prompt) {
     });
 
     req.on('error', reject);
-    req.setTimeout(20000, () => { req.destroy(); reject(new Error('Gemini request timeout')); });
+    req.setTimeout(35000, () => { req.destroy(); reject(new Error('Gemini request timeout')); });
     req.write(body);
     req.end();
   });
