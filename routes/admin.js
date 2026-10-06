@@ -20,6 +20,7 @@ const Report   = require('../models/Report');
 const Story    = require('../models/Story');
 const Review   = require('../models/Review');
 const Alert    = require('../models/Alert');
+const Analytics= require('../models/Analytics');
 
 const MODELS = { reports: Report, stories: Story, reviews: Review, alerts: Alert };
 
