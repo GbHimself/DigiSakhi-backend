@@ -22,6 +22,7 @@ app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'https://digisakhi2026.netlify.app',
     'https://digisakhi2026.netlify.app',
+    'https://gbhimself.github.io',
     'https://digisakhi-backend-0c6q.onrender.com',
     'http://localhost:5500',
     'http://127.0.0.1:5500',
