@@ -81,7 +81,7 @@ router.post('/', chatLimiter, async (req, res) => {
     /* Lazy-load the SDK so server still starts if package not installed yet */
     const { GoogleGenerativeAI } = require('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
     /* Fetch relevant context from DB */
     const userWords = message.toLowerCase().split(' ').filter(w => w.length > 3);
