@@ -5,8 +5,9 @@ const cors       = require('cors');
 const helmet     = require('helmet');
 const path       = require('path');
 
-const publicRoutes = require('./routes/public');
-const adminRoutes  = require('./routes/admin');
+const publicRoutes  = require('./routes/public');
+const adminRoutes   = require('./routes/admin');
+const chatbotRoute  = require('./routes/chatbot');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +39,7 @@ app.use('/admin', express.static(path.join(__dirname, 'admin')));
 /* ── API routes ── */
 app.use('/api', publicRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatbotRoute);
 
 /* ── Health check ── */
 app.get('/health', (req, res) => {
